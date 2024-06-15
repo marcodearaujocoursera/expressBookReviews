@@ -18,9 +18,7 @@ const doesExist = (username)=>{
 public_users.post("/register", (req,res) => {
   const username = req.body.username;
   const password = req.body.password;
-  console.log(username)
-  console.log(password)
-  console.log(req.body)
+
   if (username && password) {
     if (!doesExist(username)) {
       users.push({"username":username,"password":password});
@@ -34,16 +32,16 @@ public_users.post("/register", (req,res) => {
 
 // Get the book list available in the shop
 public_users.get('/',function (req, res) {
-  return res.status(200).json({books: books});
+  (Promise.resolve(books))
+    .then(books => res.status(200).json({books: books}))
 });
 
 // Get book details based on ISBN
 public_users.get('/isbn/:isbn',function (req, res) {
   const isbn = req.params.isbn;
 
-  return res.status(200).json({
-    book: books[Object.keys(books).filter(bookId => books[bookId].isbn == isbn)]
-  });
+  (Promise.resolve(isbn))
+    .then(isbn => res.status(200).json({book: books[isbn]}))
  });
   
 // Get book details based on author
@@ -59,7 +57,6 @@ public_users.get('/author/:author',function (req, res) {
   });
   
   myPromise
-    //.then(console.log)
     .then(booksFound => res.status(200).json({books: booksFound}))
 });
 
@@ -76,7 +73,6 @@ public_users.get('/title/:title',function (req, res) {
   });
   
   myPromise
-    //.then(console.log)
     .then(booksFound => res.status(200).json({books: booksFound}))
 });
 
@@ -84,12 +80,11 @@ public_users.get('/title/:title',function (req, res) {
 public_users.get('/review/:isbn',function (req, res) {
   const isbn = req.params.isbn;
   const myPromise = new Promise((resolve, reject) => {
-    const book = books[Object.keys(books).filter(bookId => books[bookId].isbn == isbn)]
+    const book = books[isbn]
     resolve(typeof book == 'undefined' ? {} : book.reviews)
   });
   
   myPromise
-    //.then(console.log)
     .then(reviews => res.status(200).json({ reviews: reviews }))
 
 });
